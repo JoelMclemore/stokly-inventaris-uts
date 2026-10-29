@@ -102,7 +102,7 @@ jobs:
           docker compose up -d --build
           docker compose ps
       - name: Verify deployed website and database
-        shell: pwsh
+        shell: powershell
         env:
           LOCAL_APP_PORT: ${{ vars.LOCAL_APP_PORT || '8080' }}
         run: |
