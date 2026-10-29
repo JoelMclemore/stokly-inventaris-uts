@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f5f7fb">
+  <meta name="description" content="Stokly - aplikasi manajemen inventaris berbasis Docker, Node.js, dan MySQL.">
+  <title>Stokly — Manajemen Inventaris</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#dashboard" aria-label="Stokly beranda">
+        <span class="brand-symbol">
+          <svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="5" y="5" width="10" height="10" rx="3" fill="currentColor"/><rect x="17" y="5" width="10" height="10" rx="3" fill="currentColor" opacity=".5"/><rect x="5" y="17" width="10" height="10" rx="3" fill="currentColor" opacity=".5"/><rect x="17" y="17" width="10" height="10" rx="3" fill="currentColor"/></svg>
+        </span>
+        <span>stokly<span class="brand-dot">.</span><small>INVENTORY MANAGEMENT</small></span>
+      </a>
+
+      <div class="sidebar-label">MENU UTAMA</div>
+      <nav class="side-nav" aria-label="Navigasi utama">
+        <a class="nav-link active" href="#dashboard" data-nav="dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          <span>Dashboard</span>
+        </a>
+        <a class="nav-link" href="#data-barang" data-nav="data-barang">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 8 9 5 9-5M3 12l9 5 9-5M3 16l9 5 9-5"/></svg>
+          <span>Data Barang</span>
+          <span class="nav-count" id="navCount">0</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-label extra-label">PROYEK UTS DEVOPS</div>
+      <div class="sidebar-info">
+        <span class="info-icon">⌘</span>
+        <div><strong>Docker + MySQL</strong><span>4 layanan terhubung</span></div>
+      </div>
+      <div class="sidebar-info">
+        <span class="info-icon">↗</span>
+        <div><strong>CI / CD Ready</strong><span>GitHub Actions</span></div>
+      </div>
+
+      <div class="sidebar-bottom">
+        <div class="connection"><span class="connection-dot" id="connectionDot"></span><div><strong id="connectionTitle">Menghubungkan...</strong><small id="connectionDescription">Memeriksa database</small></div></div>
+        <div class="sidebar-caption">UTS Pengembangan & Operasi<br>© 2026 Stokly Project</div>
+      </div>
+    </aside>
+
+    <main class="main-content" id="dashboard">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-button mobile-menu" id="menuButton" type="button" aria-label="Buka menu" aria-expanded="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+          </button>
+          <div class="breadcrumb"><span>Workspace</span><span class="breadcrumb-slash">/</span><strong>Dashboard</strong></div>
+        </div>
+        <div class="topbar-right">
+          <span class="today-date" id="todayDate"></span>
+          <span class="avatar" aria-label="Admin inventaris">AD</span>
+          <span class="admin-name">Admin <small>Administrator</small></span>
+        </div>
+      </header>
+
+      <div class="page-content">
+        <div class="welcome-bar"><div><span class="eyebrow"><span class="eyebrow-dot"></span> SISTEM INVENTARIS</span><h1>Dashboard <span>Inventaris</span></h1><p>Kelola, pantau, dan atur stok barang dalam satu tempat.</p></div><button class="primary-button top-add" id="addTopButton" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> Tambah Barang</button></div>
+
+        <section class="hero-banner" aria-label="Informasi aplikasi">
+          <div class="hero-content"><div class="hero-pill"><span></span> INVENTORY CONTROL PANEL</div><h2>Inventaris rapi,<br><em>kerja lebih efisien.</em></h2><p>Pantau semua stok barang secara real-time dengan penyimpanan data MySQL.</p><a class="hero-link" href="#data-barang">Lihat data barang <span>↗</span></a></div>
+          <div class="hero-art" aria-hidden="true"><div class="hero-orbit orbit-one"></div><div class="hero-orbit orbit-two"></div><div class="hero-object hero-object-back"></div><div class="hero-object hero-object-main"><svg viewBox="0 0 100 100" fill="none"><path d="m50 13 33 18v38L50 87 17 69V31l33-18Z" stroke="white" stroke-width="3"/><path d="m17 31 33 18 33-18M50 49v38M34 21l33 18" stroke="white" stroke-width="3" stroke-linecap="round"/></svg></div><span class="hero-spark spark-one">✦</span><span class="hero-spark spark-two">✧</span></div>
+        </section>
+
+        <section class="stats-grid" aria-label="Ringkasan inventaris">
+          <div class="stat-card"><div class="stat-top"><span class="stat-icon purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 13h3"/></svg></span><span class="stat-tag">TOTAL ITEM</span></div><strong id="totalItems">—</strong><span class="stat-sub">Jenis barang terdaftar</span></div>
+          <div class="stat-card"><div class="stat-top"><span class="stat-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m12 2 9 5-9 5-9-5 9-5ZM3 12l9 5 9-5M3 17l9 5 9-5"/></svg></span><span class="stat-tag">UNIT TERSEDIA</span></div><strong id="totalStock">—</strong><span class="stat-sub">Total seluruh unit stok</span></div>
+          <div class="stat-card"><div class="stat-top"><span class="stat-icon orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m12 3 9 16H3L12 3Z"/><path d="M12 9v4M12 16h.01"/></svg></span><span class="stat-tag">PERLU PERHATIAN</span></div><strong id="lowStock">—</strong><span class="stat-sub">Barang dengan stok ≤ 5</span></div>
+          <div class="stat-card"><div class="stat-top"><span class="stat-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M16 12h5M7 6V4h11"/><circle cx="14" cy="12" r="1"/></svg></span><span class="stat-tag">NILAI INVENTARIS</span></div><strong id="totalValue" class="money-stat">—</strong><span class="stat-sub">Estimasi nilai total barang</span></div>
+        </section>
+
+        <section class="table-section" id="data-barang">
+          <div class="section-heading"><div><span class="section-kicker">INVENTORY LIST</span><h2>Daftar Barang <span id="itemCountBadge">0</span></h2><p>Semua data barang tersimpan langsung di database MySQL.</p></div><button class="outline-button" id="exportButton" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v3h16v-3"/></svg> Ekspor CSV</button></div>
+          <div class="table-card">
+            <div class="filters"><label class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg><input id="searchInput" type="search" placeholder="Cari nama atau kode barang..." aria-label="Cari barang"></label><div class="filter-right"><label class="filter-select-label"><span class="visually-hidden">Kategori</span><select id="categoryFilter"><option value="">Semua Kategori</option><option>Elektronik</option><option>ATK</option><option>Peralatan</option><option>Lainnya</option></select></label><label class="filter-select-label"><span class="visually-hidden">Urutan</span><select id="sortFilter"><option value="newest">Terbaru</option><option value="name">Nama A-Z</option><option value="stock-asc">Stok Terendah</option><option value="stock-desc">Stok Tertinggi</option></select></label></div></div>
+            <div class="table-scroll"><table><thead><tr><th>BARANG</th><th>KODE SKU</th><th>KATEGORI</th><th>STOK</th><th>HARGA SATUAN</th><th>STATUS</th><th class="action-header">AKSI</th></tr></thead><tbody id="itemsBody"><tr><td colspan="7" class="loading-cell">Memuat data inventaris...</td></tr></tbody></table></div>
+            <div class="table-footer"><span id="showingText">Menampilkan data...</span><div class="pagination"><button class="page-button" id="prevPage" type="button" aria-label="Halaman sebelumnya">‹</button><span id="pageLabel">1 / 1</span><button class="page-button" id="nextPage" type="button" aria-label="Halaman berikutnya">›</button></div></div>
+          </div>
+        </section>
+        <footer class="page-footer"><span>Stokly Inventory System · UTS DevOps 2026</span><span>Built with HTML, CSS, JavaScript, Node.js & MySQL</span></footer>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="itemModal" hidden>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-heading"><div><span class="modal-kicker">DATA INVENTARIS</span><h2 id="modalTitle">Tambah Barang Baru</h2><p id="modalSubtitle">Isi informasi barang dengan lengkap.</p></div><button class="close-button" id="closeModalButton" type="button" aria-label="Tutup formulir">×</button></div>
+      <form id="itemForm" novalidate>
+        <div class="form-grid"><label class="form-field full"><span>Nama Barang <b>*</b></span><input type="text" id="itemName" name="name" required minlength="3" maxlength="100" placeholder="Contoh: Mouse Wireless"></label><label class="form-field"><span>Kode SKU <b>*</b></span><input type="text" id="itemSku" name="sku" required minlength="3" maxlength="32" placeholder="Contoh: ELK-004"><small>Unik, menggunakan huruf dan angka</small></label><label class="form-field"><span>Kategori <b>*</b></span><select id="itemCategory" name="category" required><option value="">Pilih kategori...</option><option>Elektronik</option><option>ATK</option><option>Peralatan</option><option>Lainnya</option></select></label><label class="form-field"><span>Jumlah Stok <b>*</b></span><input type="number" id="itemStock" name="stock" min="0" max="1000000" step="1" required placeholder="0"></label><label class="form-field"><span>Harga Satuan (Rp) <b>*</b></span><input type="number" id="itemPrice" name="price" min="0" max="9999999999.99" step="0.01" required placeholder="0"></label></div>
+        <p class="form-error" id="formError" role="alert" hidden></p><div class="modal-actions"><button class="cancel-button" id="cancelFormButton" type="button">Batal</button><button class="primary-button save-button" id="saveButton" type="submit">Simpan Barang</button></div>
+      </form>
+    </section>
+  </div>
+
+  <div class="modal-overlay" id="deleteModal" hidden>
+    <section class="modal delete-dialog" role="alertdialog" aria-modal="true" aria-labelledby="deleteTitle" aria-describedby="deleteMessage">
+      <div class="delete-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m3 0-1 13H7L6 7M10 11v5M14 11v5"/></svg></div><h2 id="deleteTitle">Hapus barang?</h2><p id="deleteMessage">Data barang ini akan dihapus permanen dari MySQL.</p><div class="delete-actions"><button class="cancel-button" id="cancelDeleteButton" type="button">Batalkan</button><button class="danger-button" id="confirmDeleteButton" type="button">Ya, Hapus</button></div>
+    </section>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
+
