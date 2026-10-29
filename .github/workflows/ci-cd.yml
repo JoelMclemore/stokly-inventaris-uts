@@ -84,7 +84,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Deploy containers to Docker Desktop
-        shell: pwsh
+        shell: powershell
         env:
           MYSQL_ROOT_PASSWORD: ${{ secrets.LOCAL_MYSQL_ROOT_PASSWORD }}
           MYSQL_DATABASE: ${{ secrets.LOCAL_MYSQL_DATABASE }}
