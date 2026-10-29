@@ -12,16 +12,16 @@ permissions:
   contents: read
 
 jobs:
-  # =============================================
+  # ==========================================
   # 1. CONTINUOUS INTEGRATION (CI)
-  # =============================================
+  # ==========================================
 
   test:
     name: CI - Test + Docker Compose
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source code
+      - name: Checkout Source Code
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -31,35 +31,35 @@ jobs:
           cache: npm
           cache-dependency-path: backend/package-lock.json
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: npm ci --prefix backend
 
-      - name: Syntax and unit tests
+      - name: Syntax and Unit Tests
         run: |
           npm run check --prefix backend
           npm test --prefix backend
           node --check frontend/app.js
           node --check scripts/smoke-test.mjs
 
-      - name: Start 4 Docker containers
+      - name: Start 4 Docker Containers
         run: |
           cp .env.example .env
           docker compose up -d --build
 
-      - name: CRUD integration test
+      - name: CRUD Integration Test
         run: node scripts/smoke-test.mjs
 
-      - name: Show container logs if failed
+      - name: Show Container Logs if Failed
         if: failure()
         run: docker compose logs --tail=80
 
-      - name: Stop test containers
+      - name: Stop Test Containers
         if: always()
         run: docker compose down -v
 
-  # =============================================
-  # 2. CONTINUOUS DELIVERY (DOCKER HUB)
-  # =============================================
+  # ==========================================
+  # 2. CONTINUOUS DELIVERY - DOCKER HUB
+  # ==========================================
 
   publish:
     name: CD - Publish Images to Docker Hub
@@ -70,7 +70,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source code
+      - name: Checkout Source Code
         uses: actions/checkout@v4
 
       - name: Setup Docker Buildx
@@ -100,9 +100,9 @@ jobs:
             joelsstr/stokly-web:latest
             joelsstr/stokly-web:${{ github.sha }}
 
-  # =============================================
-  # 3. CD - DEPLOY KE WINDOWS DOCKER DESKTOP
-  # =============================================
+  # ==========================================
+  # 3. CD - WINDOWS DOCKER DESKTOP
+  # ==========================================
 
   deploy_local:
     name: CD - Deploy to Windows Docker Desktop
@@ -114,7 +114,7 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - name: Checkout source code
+      - name: Checkout Source Code
         uses: actions/checkout@v4
 
       - name: Deploy Images from Docker Hub
@@ -132,56 +132,79 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
 
         run: |
-          # Periksa konfigurasi database
-          foreach ($key in @(
+          $ErrorActionPreference = 'Stop'
+
+          # Pastikan GitHub Secrets database tersedia
+          $requiredSecrets = @(
             'MYSQL_ROOT_PASSWORD',
             'MYSQL_DATABASE',
             'MYSQL_USER',
             'MYSQL_PASSWORD'
-          )) {
-            if ([string]::IsNullOrWhiteSpace(
-              [Environment]::GetEnvironmentVariable($key)
-            )) {
+          )
+
+          foreach ($key in $requiredSecrets) {
+            $value = [Environment]::GetEnvironmentVariable($key)
+
+            if ([string]::IsNullOrWhiteSpace($value)) {
               throw "GitHub secret $key belum dikonfigurasi."
             }
           }
 
-          # Ambil image yang dipublikasikan oleh GitHub Actions
+          Write-Host "Mengambil Docker image dari Docker Hub..."
+
+          # Download image backend dari Docker Hub
           docker pull "joelsstr/stokly-api:$env:IMAGE_TAG"
+
           if ($LASTEXITCODE -ne 0) {
-            throw "Gagal pull image backend."
+            throw "Gagal mengambil image backend dari Docker Hub."
           }
 
+          # Download image frontend dari Docker Hub
           docker pull "joelsstr/stokly-web:$env:IMAGE_TAG"
+
           if ($LASTEXITCODE -ne 0) {
-            throw "Gagal pull image frontend."
+            throw "Gagal mengambil image frontend dari Docker Hub."
           }
 
-          # Override image API dan web tanpa mengubah compose.yaml
+          # Membuat konfigurasi tambahan untuk Docker Hub
           $overridePath = Join-Path $env:RUNNER_TEMP 'stokly-dockerhub.override.yaml'
 
-          @(
+          $overrideContent = @(
             'services:'
             '  api:'
             '    image: joelsstr/stokly-api:${IMAGE_TAG}'
             '  web:'
             '    image: joelsstr/stokly-web:${IMAGE_TAG}'
-          ) | Set-Content -Path $overridePath -Encoding UTF8
+          )
 
-          # Validasi konfigurasi Docker Compose
+          $overrideContent | Set-Content -Path $overridePath -Encoding UTF8
+
+          Write-Host "Memvalidasi Docker Compose..."
+
           docker compose -f compose.yaml -f $overridePath config --quiet
+
           if ($LASTEXITCODE -ne 0) {
             throw "Konfigurasi Docker Compose tidak valid."
           }
 
-          # Jalankan 4 layanan dengan image Docker Hub
+          Write-Host "Menjalankan container Stokly..."
+
+          # Menggunakan image Docker Hub tanpa build ulang
           docker compose -f compose.yaml -f $overridePath up -d --no-build
+
           if ($LASTEXITCODE -ne 0) {
             throw "Deployment Docker Compose gagal."
           }
 
-          # Tampilkan status container
+          Write-Host "Menampilkan status container..."
+
           docker compose -f compose.yaml -f $overridePath ps
+
+          if ($LASTEXITCODE -ne 0) {
+            throw "Gagal memeriksa status container."
+          }
+
+          Write-Host "Proses deployment container selesai."
 
       - name: Verify Website and MySQL Database
         shell: powershell
@@ -192,7 +215,10 @@ jobs:
         run: |
           $url = "http://127.0.0.1:$env:LOCAL_APP_PORT/api/health"
 
+          Write-Host "Memeriksa website dan koneksi database..."
+
           for ($attempt = 1; $attempt -le 60; $attempt++) {
+
             try {
               $health = Invoke-RestMethod -Uri $url -TimeoutSec 3
 
@@ -201,20 +227,23 @@ jobs:
                 $health.database -eq 'connected'
               ) {
                 Write-Host "Deployment berhasil!"
-                Write-Host "Website dan database MySQL terhubung."
+                Write-Host "Website Stokly berjalan."
+                Write-Host "Database MySQL terhubung."
                 exit 0
               }
             }
             catch {
-              Start-Sleep -Seconds 2
+              Write-Host "Aplikasi belum siap. Percobaan $attempt..."
             }
+
+            Start-Sleep -Seconds 2
           }
 
-          throw "Deployment belum sehat setelah 120 detik."
+          throw "Deployment gagal: website atau MySQL belum siap."
 
-  # =============================================
+  # ==========================================
   # 4. CD - DEPLOY KE VPS (OPSIONAL)
-  # =============================================
+  # ==========================================
 
   deploy:
     name: CD - Deploy to VPS (optional)
@@ -225,7 +254,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source code
+      - name: Checkout Source Code
         uses: actions/checkout@v4
 
       - name: Configure SSH
@@ -235,8 +264,10 @@ jobs:
 
         run: |
           install -m 700 -d ~/.ssh
+
           printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
+
           printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
 
@@ -250,6 +281,7 @@ jobs:
           ssh "$DEPLOY_USER@$DEPLOY_HOST" "mkdir -p '$DEPLOY_PATH/database'"
 
           scp compose.prod.yaml "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/compose.prod.yaml"
+
           scp database/init.sql "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/database/init.sql"
 
           IMAGE_PREFIX="joelsstr/stokly"
