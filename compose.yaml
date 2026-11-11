@@ -2,7 +2,7 @@ name: stokly-uts
 
 services:
   db:
-    image: mysql:8.4
+    image: mysql:8.0
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
@@ -53,13 +53,12 @@ services:
     networks: [internal]
 
   phpmyadmin:
-    image: phpmyadmin:5.2-apache
+    image: adminer:latest
     restart: unless-stopped
     environment:
-      PMA_HOST: db
-      PMA_PORT: 3306
+      ADMINER_DEFAULT_SERVER: db
     ports:
-      - "127.0.0.1:${ADMIN_PORT:-8081}:80"
+      - "127.0.0.1:${ADMIN_PORT:-8081}:8080"
     depends_on:
       db:
         condition: service_healthy
