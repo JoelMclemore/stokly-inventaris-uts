@@ -57,7 +57,7 @@ jobs:
     name: CD - Publish Images to Docker Hub
     needs: test
 
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && secrets.DOCKERHUB_USERNAME != ''
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
 
     runs-on: ubuntu-latest
 
